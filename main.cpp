@@ -8,6 +8,9 @@ class Board
 {
 private:
     std::vector<std::vector<bool>> m_bombGrid;
+    //m_bombGrid is a vector of vectors containing locations of the bombs
+    std::vector<std::vector<char>> m_completeGrid;
+    //m_gameGrid is a vector of vectors containing locations of the bombs and clues
     int m_level = -1;
     int m_bombCount = -1;
     int m_gridRows = 0;
@@ -23,6 +26,10 @@ public:
         std::vector<std::vector<bool>> newGrid(m_gridRows, std::vector<bool>(m_gridCols));
         m_bombGrid = newGrid;
         GenerateBombsRandom(bombChance);
+
+        std::vector<std::vector<char>> newCompleteGrid(m_gridRows, std::vector<char>(m_gridCols));
+        m_completeGrid = newCompleteGrid;
+        GenerateCompleteGrid();
     }
     Board(int levelDifficulty)
     {
@@ -40,6 +47,10 @@ public:
         m_bombGrid = newGrid;
 
         GenerateBombs(levels[m_level][2]);
+
+        std::vector<std::vector<char>> newCompleteGrid(m_gridRows, std::vector<char>(m_gridCols));
+        m_completeGrid = newCompleteGrid;
+        GenerateCompleteGrid();
     }
 
 
@@ -91,6 +102,34 @@ public:
             }
         }
     }
+
+    void DisplayBombGrid()
+    {
+        for (int row = 0; row < m_bombGrid.size(); row++)
+        {
+            for (int col = 0; col < m_bombGrid[0].size(); col++)
+            {
+                std::cout << "[" << m_bombGrid[row][col] << "] ";
+            }
+            std::cout << "\n";
+        }
+    }
+
+    void DisplayCompleteGrid()
+    {
+        for (int row = 0; row < m_completeGrid.size(); row++)
+        {
+            for (int col = 0; col < m_completeGrid[0].size(); col++)
+            {
+                std::string current = "";
+                current += m_completeGrid[row][col];
+                char currentC = m_completeGrid[row][col];
+                std::cout << "[" << m_completeGrid[row][col] << "] ";
+            }
+            std::cout << "\n";
+        }
+    }
+
 private:
     bool GenerateRandomBomb(int diceSide)
     {
@@ -99,12 +138,56 @@ private:
         int randomNumber = dist(rd);
         return randomNumber == 1;
     }
+
+    bool IsBombInLocation(int row, int col)
+    {
+        //Return true if there is a bomb in m_bombGrid[row][col]
+        if (IsOutsideOfGrid(row, col))
+        {
+            return false;
+        }
+        return m_bombGrid[row][col];
+    }
+    
+    bool IsOutsideOfGrid(int row, int col)
+    {
+        //Returns true if outside of grid
+        return row < 0 || row >= m_gridRows || col < 0 || col >= m_gridCols;
+    }
+    
+    void GenerateCompleteGrid()
+    {
+        //Generate the complete grid - this includes bombs and clues to their location
+        for (int row = 0; row < m_gridRows; row++)
+        {
+            for (int col = 0; col < m_gridCols; col++)
+            {
+                //std::cout << row << " " << col << std::endl;
+                if (IsBombInLocation(row, col))
+                {
+                    m_completeGrid[row][col] = 'x';
+                    continue;
+                }
+                int bombsInRadius = 48;
+                std::vector<std::vector<int>> directions = {{1, 0}, {1, 1}, {0, 1}, {0, -1}, {-1, 0}, {-1, -1}, {1, -1}, {-1, 1}};
+                for (auto direction : directions)
+                {
+                    //std::cout << "row: " << row + direction[0] << " col:" << col + direction[1] << std::endl;
+                    if (IsBombInLocation(row + direction[0], col + direction[1]))
+                    {
+                        bombsInRadius += 1;
+                    }
+                }
+                m_completeGrid[row][col] = bombsInRadius;
+            }
+        }
+    }
+
+    
 };
 
 int main()
 {
-    Board ms(0);
-
-    std::cout << "end" << std::endl;
-
+    Board minesweeper(0);
+    minesweeper.DisplayCompleteGrid();
 }
