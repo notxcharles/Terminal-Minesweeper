@@ -133,6 +133,23 @@ public:
         }
     }
 
+    void DisplayCompleteGridWithCoordinates()
+    {
+        std::cout << "    1   2   3   4   5   6   7   8" << std::endl;
+        for (int row = 0; row < m_completeGrid.size(); row++)
+        {
+            std::cout << row + 1 << "  ";
+            for (int col = 0; col < m_completeGrid[0].size(); col++)
+            {
+                std::string current = "";
+                current += m_completeGrid[row][col];
+                char currentC = m_completeGrid[row][col];
+                std::cout << "[" << m_completeGrid[row][col] << "] ";
+            }
+            std::cout << "\n";
+        }
+    }
+
 private:
     bool GenerateRandomBomb(int diceSide)
     {
@@ -190,7 +207,8 @@ private:
 int main()
 {
     Board minesweeper(0);
-    minesweeper.DisplayCompleteGrid();
+    //minesweeper.DisplayCompleteGrid();
+    minesweeper.DisplayCompleteGridWithCoordinates();
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
