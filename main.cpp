@@ -16,12 +16,13 @@ private:
     std::map<int, std::vector<int>> levels;
     
 public:
-    Board(int gridRows, int gridCols)
+    Board(int gridRows, int gridCols, int bombChance)
     {
         m_gridRows = gridRows;
         m_gridCols = gridCols;
         std::vector<std::vector<bool>> newGrid(m_gridRows, std::vector<bool>(m_gridCols));
         m_bombGrid = newGrid;
+        GenerateBombsRandom(bombChance);
     }
     Board(int levelDifficulty)
     {
