@@ -23,10 +23,59 @@ public:
         std::vector<std::vector<bool>> newGrid(m_gridRows, std::vector<bool>(m_gridCols));
         m_bombGrid = newGrid;
     }
+    Board(int levelDifficulty)
+    {
+        m_level = levelDifficulty;
+        //Beginner
+        levels[0] = {8, 8, 10};
+        //Intermediate
+        levels[1] = {16, 16, 40};
+        //Expert
+        levels[2] = {30, 16, 99};
+
+        m_gridRows = levels[m_level][0];
+        m_gridCols = levels[m_level][1];
+        std::vector<std::vector<bool>> newGrid(m_gridRows, std::vector<bool>(m_gridCols));
+        m_bombGrid = newGrid;
+
+        GenerateBombs(levels[m_level][2]);
+    }
+
+
+    void GenerateBombs(int numberOfBombs)
+    {
+        int gridTiles = m_gridRows * m_gridCols;
+        int bombChance = (float)gridTiles/numberOfBombs;
+
+        while (m_bombCount < numberOfBombs)
+        {
+            for (int row = 0; row < m_bombGrid.size(); row++)
+            {
+                for (int col = 0; col < m_bombGrid[0].size(); col++)
+                {
+                    
+                    if (m_bombGrid[row][col] == 1) continue;
+
+                    bool isBomb = GenerateRandomBomb(bombChance);
+                    m_bombGrid[row][col] = isBomb;
+                    if (isBomb)
+                    {
+                        m_bombCount += 1;
+                    }
+                    if (m_bombCount == numberOfBombs)
+                    {
+                        return;
+                    }
+
+                }
+            }
+        }
+    }
     void GenerateBombsRandom(int bombChance)
     {
         int sidedDice = (float)(100/bombChance);
         m_bombCount = 0;
+
         for (int row = 0; row < m_bombGrid.size(); row++)
         {
             for (int col = 0; col < m_bombGrid[0].size(); col++)
@@ -53,8 +102,7 @@ private:
 
 int main()
 {
-    Board ms(10, 4);
-    ms.GenerateBombsRandom(25);
+    Board ms(0);
 
     std::cout << "end" << std::endl;
 
