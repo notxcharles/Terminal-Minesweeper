@@ -1,3 +1,6 @@
+// Terminal-Minesweeper.cpp : This file contains the 'main' function. Program execution begins and ends there.
+//
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -17,7 +20,7 @@ private:
     int m_gridCols = 0;
 
     std::map<int, std::vector<int>> levels;
-    
+
 public:
     Board(int gridRows, int gridCols, int bombChance)
     {
@@ -35,11 +38,11 @@ public:
     {
         m_level = levelDifficulty;
         //Beginner
-        levels[0] = {8, 8, 10};
+        levels[0] = { 8, 8, 10 };
         //Intermediate
-        levels[1] = {16, 16, 40};
+        levels[1] = { 16, 16, 40 };
         //Expert
-        levels[2] = {30, 16, 99};
+        levels[2] = { 30, 16, 99 };
 
         m_gridRows = levels[m_level][0];
         m_gridCols = levels[m_level][1];
@@ -57,7 +60,7 @@ public:
     void GenerateBombs(int numberOfBombs)
     {
         int gridTiles = m_gridRows * m_gridCols;
-        int bombChance = (float)gridTiles/numberOfBombs;
+        int bombChance = (float)gridTiles / numberOfBombs;
 
         while (m_bombCount < numberOfBombs)
         {
@@ -65,7 +68,7 @@ public:
             {
                 for (int col = 0; col < m_bombGrid[0].size(); col++)
                 {
-                    
+
                     if (m_bombGrid[row][col] == 1) continue;
 
                     bool isBomb = GenerateRandomBomb(bombChance);
@@ -85,7 +88,7 @@ public:
     }
     void GenerateBombsRandom(int bombChance)
     {
-        int sidedDice = (float)(100/bombChance);
+        int sidedDice = (float)(100 / bombChance);
         m_bombCount = 0;
 
         for (int row = 0; row < m_bombGrid.size(); row++)
@@ -148,13 +151,13 @@ private:
         }
         return m_bombGrid[row][col];
     }
-    
+
     bool IsOutsideOfGrid(int row, int col)
     {
         //Returns true if outside of grid
         return row < 0 || row >= m_gridRows || col < 0 || col >= m_gridCols;
     }
-    
+
     void GenerateCompleteGrid()
     {
         //Generate the complete grid - this includes bombs and clues to their location
@@ -169,7 +172,7 @@ private:
                     continue;
                 }
                 int bombsInRadius = 48;
-                std::vector<std::vector<int>> directions = {{1, 0}, {1, 1}, {0, 1}, {0, -1}, {-1, 0}, {-1, -1}, {1, -1}, {-1, 1}};
+                std::vector<std::vector<int>> directions = { {1, 0}, {1, 1}, {0, 1}, {0, -1}, {-1, 0}, {-1, -1}, {1, -1}, {-1, 1} };
                 for (auto direction : directions)
                 {
                     //std::cout << "row: " << row + direction[0] << " col:" << col + direction[1] << std::endl;
@@ -182,8 +185,6 @@ private:
             }
         }
     }
-
-    
 };
 
 int main()
@@ -191,3 +192,14 @@ int main()
     Board minesweeper(0);
     minesweeper.DisplayCompleteGrid();
 }
+
+// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
+// Debug program: F5 or Debug > Start Debugging menu
+
+// Tips for Getting Started: 
+//   1. Use the Solution Explorer window to add/manage files
+//   2. Use the Team Explorer window to connect to source control
+//   3. Use the Output window to see build output and other messages
+//   4. Use the Error List window to view errors
+//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
+//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
