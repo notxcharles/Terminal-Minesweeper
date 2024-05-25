@@ -2,6 +2,8 @@
 //
 
 #include <iostream>
+#include <windows.h>
+#include<limits>
 #include <vector>
 #include <string>
 #include <map>
@@ -14,6 +16,8 @@ private:
     //m_bombGrid is a vector of vectors containing locations of the bombs
     std::vector<std::vector<char>> m_completeGrid;
     //m_gameGrid is a vector of vectors containing locations of the bombs and clues
+    std::vector<std::vector<char>> m_blankGrid;
+    //m_blankGrid is a vector of vectors containing nothing but a blank grid. this is the board that the user sees
     int m_level = -1;
     int m_bombCount = -1;
     int m_gridRows = 0;
@@ -22,6 +26,13 @@ private:
     std::map<int, std::vector<int>> levels;
 
 public:
+    enum InformationFound {
+        Bomb,
+        Clue,
+        BlankSpace,
+        None
+    };
+
     Board(int gridRows, int gridCols, int bombChance)
     {
         m_gridRows = gridRows;
@@ -54,6 +65,9 @@ public:
         std::vector<std::vector<char>> newCompleteGrid(m_gridRows, std::vector<char>(m_gridCols));
         m_completeGrid = newCompleteGrid;
         GenerateCompleteGrid();
+
+        std::vector<std::vector<char>> newBlankGrid(m_gridRows, std::vector<char>(m_gridCols));
+        m_blankGrid = newBlankGrid;
     }
 
 
@@ -117,7 +131,6 @@ public:
             std::cout << "\n";
         }
     }
-
     void DisplayCompleteGrid()
     {
         for (int row = 0; row < m_completeGrid.size(); row++)
@@ -132,7 +145,6 @@ public:
             std::cout << "\n";
         }
     }
-
     void DisplayCompleteGridWithCoordinates()
     {
         std::cout << "    1   2   3   4   5   6   7   8" << std::endl;
@@ -150,6 +162,30 @@ public:
         }
     }
 
+    InformationFound GuessPosition(int row, int col)
+    {
+        row = row - 1;
+        col = col - 1;
+        if (IsOutsideOfGrid(row, col))
+        {
+            return None;
+        }
+        char result = m_completeGrid[row][col];
+        if (result == ' ')
+        {
+            return BlankSpace;
+        }
+        else if (result == 'B')
+        {
+            return Bomb;
+        }
+        else
+        {
+            return Clue;
+        }
+        
+    }
+    
 private:
     bool GenerateRandomBomb(int diceSide)
     {
@@ -185,7 +221,7 @@ private:
                 //std::cout << row << " " << col << std::endl;
                 if (IsBombInLocation(row, col))
                 {
-                    m_completeGrid[row][col] = 'x';
+                    m_completeGrid[row][col] = 'B';
                     continue;
                 }
                 int bombsInRadius = 48;
@@ -198,17 +234,98 @@ private:
                         bombsInRadius += 1;
                     }
                 }
-                m_completeGrid[row][col] = bombsInRadius;
+                if (bombsInRadius == 48)
+                {
+                    m_completeGrid[row][col] = ' ';
+                }
+                else
+                {
+                    m_completeGrid[row][col] = bombsInRadius;
+                }
+                
             }
         }
     }
 };
 
+void ClearTerminal()
+{
+    std::cout << "\033[2J\033[1;1H";
+    return;
+}
+
 int main()
 {
+    enum GameState {
+        mainMenu,
+        playing,
+        win,
+        lose
+    };
+    GameState currentState = playing;
+    
     Board minesweeper(0);
+    while (currentState == playing)
+    {
+        minesweeper.DisplayCompleteGridWithCoordinates();
+        std::cout << "\n\n";
+        int option = 0;
+        std::cout << "(1) Flag Bomb\n(2) Guess Position\n";
+        std::cin >> option;
+        if (option == 1)
+        {
+            ClearTerminal();
+            minesweeper.DisplayCompleteGridWithCoordinates();
+            std::cout << "\n\n";
+            std::cout << "Flag Bomb" << std::endl;
+            int row = 0;
+            int col = 0;
+            std::cout << "Row: ";
+            std::cin >> row;
+            std::cout << "Column: ";
+            std::cin >> col;
+            
+        }
+        else if (option == 2)
+        {
+            std::cout << "2";
+            ClearTerminal();
+            minesweeper.DisplayCompleteGridWithCoordinates();
+            std::cout << "\n\n";
+            std::cout << "Guess Position" << std::endl;
+            int row = 0;
+            int col = 0;
+            std::cout << "Row: ";
+            std::cin >> row;
+            std::cout << "Column: ";
+            std::cin >> col;
+
+           
+            Board::InformationFound result = minesweeper.GuessPosition(row, col);
+            if (result == Board::InformationFound::Bomb)
+            {
+                std::cout << "Game over" << std::endl;
+            }
+            else if (result == Board::InformationFound::Clue)
+            {
+                std::cout << "Clue" << std::endl;
+            }
+            else if (result == Board::InformationFound::BlankSpace)
+            {
+                std::cout << "Blank space" << std::endl;
+            }
+            else
+            {
+                std::cout << "Error" << std::endl;
+            }
+        }
+        Sleep(1000);
+        std::cout << std::endl;
+        ClearTerminal();
+    }
+    
     //minesweeper.DisplayCompleteGrid();
-    minesweeper.DisplayCompleteGridWithCoordinates();
+    
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
