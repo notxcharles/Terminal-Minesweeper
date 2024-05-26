@@ -8,16 +8,21 @@
 #include <string>
 #include <map>
 #include <random>
+#include <queue>
+#include <set>
 
 class Board
 {
 private:
-    std::vector<std::vector<bool>> m_bombGrid;
     //m_bombGrid is a vector of vectors containing locations of the bombs
-    std::vector<std::vector<char>> m_completeGrid;
+    std::vector<std::vector<bool>> m_bombGrid;
+    
     //m_gameGrid is a vector of vectors containing locations of the bombs and clues
-    std::vector<std::vector<char>> m_blankGrid;
+    std::vector<std::vector<char>> m_completeGrid;
+    
     //m_blankGrid is a vector of vectors containing nothing but a blank grid. this is the board that the user sees
+    std::vector<std::vector<char>> m_playerGrid;
+    
     int m_level = -1;
     int m_bombCount = -1;
     int m_gridRows = 0;
@@ -67,7 +72,7 @@ public:
         GenerateCompleteGrid();
 
         std::vector<std::vector<char>> newBlankGrid(m_gridRows, std::vector<char>(m_gridCols));
-        m_blankGrid = newBlankGrid;
+        m_playerGrid = newBlankGrid;
     }
 
 
@@ -184,6 +189,72 @@ public:
             return Clue;
         }
         
+    }
+
+    void ExploreArea(int row, int col)
+    {
+        //
+        std::vector<std::vector<char>> grid = m_completeGrid;
+
+        std::set<std::vector<int>> seen;
+        std::queue<std::vector<int>> exploreQueue;
+        exploreQueue.push(std::vector<int>{row, col});
+        seen.insert(std::vector<int>{row, col});
+
+        while (!exploreQueue.empty())
+        {
+            int n = exploreQueue.size();
+            
+            for (int i = 0; i < n; i++)
+            {
+                std::vector<int> currentCoords = exploreQueue.front();
+                exploreQueue.pop();
+
+                int currentRow = currentCoords[0];
+                int currentCol = currentCoords[1];
+                seen.insert(std::vector<int>{currentRow, currentCol});
+
+                if (IsOutsideOfGrid(currentRow - 1, currentCol - 1))
+                {
+                    std::cout << currentRow << "," << currentCol << " is out of bounds" << std::endl;
+                    continue;
+                }
+                else if (grid[currentRow - 1][currentCol - 1] == '1' ||
+                    grid[currentRow - 1][currentCol - 1] == '2' ||
+                    grid[currentRow - 1][currentCol - 1] == '3' ||
+                    grid[currentRow - 1][currentCol - 1] == '4' ||
+                    grid[currentRow - 1][currentCol - 1] == '5' ||
+                    grid[currentRow - 1][currentCol - 1] == '6' ||
+                    grid[currentRow - 1][currentCol - 1] == '7' ||
+                    grid[currentRow - 1][currentCol - 1] == '8' ||
+                    grid[currentRow - 1][currentCol - 1] == '9')
+                {
+                    std::cout << currentRow << "," << currentCol << " is digit" << std::endl;
+                    continue;
+                }
+                else
+                {
+                    std::cout << currentRow << "," << currentCol << " is blank" << std::endl;
+
+                    std::vector<std::vector<int>> directions = { {1,0}, {-1, 0}, {0, 1}, {0, -1} };
+                    for (std::vector<int> direction : directions)
+                    {
+                        int r = direction[0];
+                        int c = direction[1];
+                        std::vector<int> coords{ currentRow + r, currentCol + c };
+                        if (seen.count(coords) > 0)
+                        {
+                            continue;
+                        }
+
+                        exploreQueue.push(coords);
+
+                    }
+                }
+                
+                
+            }
+        }
     }
     
 private:
@@ -313,6 +384,7 @@ int main()
             else if (result == Board::InformationFound::BlankSpace)
             {
                 std::cout << "Blank space" << std::endl;
+                minesweeper.ExploreArea(row, col);
             }
             else
             {
