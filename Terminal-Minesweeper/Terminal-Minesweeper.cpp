@@ -138,6 +138,7 @@ public:
 		return;
 	}
 
+	//Displays the bomb grid in the console
 	void DisplayBombGrid()
 	{
 		for (int row = 0; row < m_bombGrid.size(); row++)
@@ -150,6 +151,7 @@ public:
 		}
 		return;
 	}
+	//Displays the complete grid (bomb grid with information tiles) in the console
 	void DisplayCompleteGrid()
 	{
 		for (int row = 0; row < m_completeGrid.size(); row++)
@@ -165,6 +167,7 @@ public:
 		}
 		return;
 	}
+	//Displays the compelete grid (bomb grid with information tiles), with row and column coordinates in the console
 	void DisplayCompleteGridWithCoordinates()
 	{
 		std::cout << "    1   2   3   4   5   6   7   8" << std::endl;
@@ -182,6 +185,7 @@ public:
 		}
 		return;
 	}
+	//Displays the player's grid (initially blank grid, but tracks the player's inputs) in the console
 	void DisplayPlayerGridWithCoordinates()
 	{
 		std::cout << "    1   2   3   4   5   6   7   8" << std::endl;
@@ -200,6 +204,7 @@ public:
 		return;
 	}
 
+	//Given an input of int row, int col, return type of tile within m_completeGrid[row-1][col-1]
 	InformationFound GuessPosition(int row, int col)
 	{
 		row = row - 1;
@@ -224,6 +229,7 @@ public:
 		return None;
 	}
 
+	//Starts a breadth first search at (row-1, col-1) when (row-1, col-1) is a blank tile
 	void ExploreArea(int row, int col, bool affectPlayerGrid = true)
 	{
 		//
@@ -249,7 +255,7 @@ public:
 
 				if (IsOutsideOfGrid(currentRow - 1, currentCol - 1))
 				{
-					std::cout << currentRow << "," << currentCol << " is out of bounds" << std::endl;
+					//std::cout << currentRow << "," << currentCol << " is out of bounds" << std::endl;
 					continue;
 				}
 				else if (m_completeGrid[currentRow - 1][currentCol - 1] == '1' ||
@@ -262,7 +268,7 @@ public:
 					m_completeGrid[currentRow - 1][currentCol - 1] == '8' ||
 					m_completeGrid[currentRow - 1][currentCol - 1] == '9')
 				{
-					std::cout << currentRow << "," << currentCol << " is digit" << std::endl;
+					//std::cout << currentRow << "," << currentCol << " is digit" << std::endl;
 					if (affectPlayerGrid)
 					{
 						m_playerGrid[currentRow - 1][currentCol - 1] = m_completeGrid[currentRow - 1][currentCol - 1];
@@ -271,7 +277,7 @@ public:
 				}
 				else
 				{
-					std::cout << currentRow << "," << currentCol << " is blank" << std::endl;
+					//std::cout << currentRow << "," << currentCol << " is blank" << std::endl;
 					if (affectPlayerGrid)
 					{
 						m_playerGrid[currentRow - 1][currentCol - 1] = m_completeGrid[currentRow - 1][currentCol - 1];
@@ -297,11 +303,14 @@ public:
 		return;
 	}
 
+	//Marks m_playerGrid[row-1][col-1] with 'F'. Suspected bomb location
 	void FlagBomb(int row, int col)
 	{
 		m_playerGrid[row - 1][col - 1] = 'F';
 		return;
 	}
+
+	//Reveals information in m_completeGrid[row-1][col-1]. 
 	void ShowClue(int row, int col)
 	{
 		m_playerGrid[row - 1][col - 1] = m_completeGrid[row - 1][col - 1];
@@ -309,6 +318,7 @@ public:
 	}
 
 private:
+	//Given a 1/diceSide chance, do we generate a bomb?
 	bool GenerateRandomBomb(int diceSide)
 	{
 		std::random_device rd;
@@ -317,9 +327,9 @@ private:
 		return randomNumber == 1;
 	}
 
+	//Returns true if there is a bomb at m_bombGrid[row][col]
 	bool IsBombInLocation(int row, int col)
 	{
-		//Return true if there is a bomb in m_bombGrid[row][col]
 		if (IsOutsideOfGrid(row, col))
 		{
 			return false;
@@ -327,15 +337,16 @@ private:
 		return m_bombGrid[row][col];
 	}
 
+	//Returns true if row, col is out of bounds
 	bool IsOutsideOfGrid(int row, int col)
 	{
 		//Returns true if outside of grid
 		return row < 0 || row >= m_gridRows || col < 0 || col >= m_gridCols;
 	}
 
+	//Given m_bombCount, generate a new grid showing both bomb location and information as to their location
 	void GenerateCompleteGrid()
 	{
-		//Generate the complete grid - this includes bombs and clues to their location
 		for (int row = 0; row < m_gridRows; row++)
 		{
 			for (int col = 0; col < m_gridCols; col++)
@@ -369,6 +380,7 @@ private:
 		}
 	}
 
+	//Fill out m_playerGrid. Each tile is initialised with the character '-'
 	void GeneratePlayerGrid()
 	{
 		for (int row = 0; row < m_playerGrid.size(); row++)
@@ -382,12 +394,52 @@ private:
 	}
 };
 
+
+
+
 void ClearTerminal()
 {
 	std::cout << "\033[2J\033[1;1H";
 	return;
 }
 
+//Promots player for row input
+int GetRow()
+{
+	int row = 0;
+	std::cout << "Row: ";
+	std::cin >> row;
+	return row;
+}
+
+//Prompts player for column input
+int GetColumn()
+{
+	int col = 0;
+	std::cout << "Col: ";
+	std::cin >> col;
+	return col;
+}
+
+//Prompts player for game input option
+int ShowGamePlayOptions()
+{
+	int option = 0;
+	std::cout << "(1) Flag Bomb\n(2) Guess Position\n";
+	std::cin >> option;
+	return option;
+}
+
+//Promots player for option after loss
+int ShowGameLoseOptions()
+{
+	int option = 0;
+	std::cout << "(1) Restart Game\n(2) Exit";
+	std::cin >> option;
+	return option;
+}
+
+//Game state = playing
 void PlayGame(Board &minesweeper, GameState &currentState)
 {
 	while (currentState == GameState::playing)
@@ -395,11 +447,9 @@ void PlayGame(Board &minesweeper, GameState &currentState)
 		minesweeper.DisplayCompleteGridWithCoordinates();
 		std::cout << "\n";
 		minesweeper.DisplayPlayerGridWithCoordinates();
-
 		std::cout << "\n\n";
-		int option = 0;
-		std::cout << "(1) Flag Bomb\n(2) Guess Position\n";
-		std::cin >> option;
+		int option = ShowGamePlayOptions();
+
 		if (option == 1)
 		{
 			ClearTerminal();
@@ -409,18 +459,14 @@ void PlayGame(Board &minesweeper, GameState &currentState)
 
 			std::cout << "\n\n";
 			std::cout << "Flag Bomb" << std::endl;
-			int row = 0;
-			int col = 0;
-			std::cout << "Row: ";
-			std::cin >> row;
-			std::cout << "Column: ";
-			std::cin >> col;
+
+			int row = GetRow();
+			int col = GetColumn();
 			minesweeper.FlagBomb(row, col);
 
 		}
 		else if (option == 2)
 		{
-			std::cout << "2";
 			ClearTerminal();
 			minesweeper.DisplayCompleteGridWithCoordinates();
 			std::cout << "\n";
@@ -428,13 +474,9 @@ void PlayGame(Board &minesweeper, GameState &currentState)
 
 			std::cout << "\n\n";
 			std::cout << "Guess Position" << std::endl;
-			int row = 0;
-			int col = 0;
-			std::cout << "Row: ";
-			std::cin >> row;
-			std::cout << "Column: ";
-			std::cin >> col;
 
+			int row = GetRow();
+			int col = GetColumn();
 
 			Board::InformationFound result = minesweeper.GuessPosition(row, col);
 			if (result == Board::InformationFound::Bomb)
@@ -445,12 +487,12 @@ void PlayGame(Board &minesweeper, GameState &currentState)
 			}
 			else if (result == Board::InformationFound::Clue)
 			{
-				std::cout << "Clue" << std::endl;
+				//std::cout << "Clue" << std::endl;
 				minesweeper.ShowClue(row, col);
 			}
 			else if (result == Board::InformationFound::BlankSpace)
 			{
-				std::cout << "Blank space" << std::endl;
+				//std::cout << "Blank space" << std::endl;
 				minesweeper.ExploreArea(row, col);
 			}
 			else
@@ -465,6 +507,7 @@ void PlayGame(Board &minesweeper, GameState &currentState)
 	return;
 }
 
+//Game state: lose
 void LoseGame(Board &minesweeper, GameState &currentState)
 {
 	while (currentState == lose)
@@ -472,22 +515,22 @@ void LoseGame(Board &minesweeper, GameState &currentState)
 		ClearTerminal();
 		minesweeper.DisplayCompleteGridWithCoordinates();
 		std::cout << "\n    You Lose    \n" << std::endl;
-		int nextStep = 0;
-		std::cout << "(1) Restart Game\n(2) Exit" << std::endl;
-		std::cin >> nextStep;
+		int option = ShowGameLoseOptions();
+		std::cin >> option;
 
-		if (nextStep == 1)
+		if (option == 1)
 		{
 			currentState = playing;
 		}
-		else if (nextStep == 2)
+		else if (option == 2)
 		{
 			currentState = stopped;
 			return;
 		}
-
 	}
+	return;
 }
+
 
 
 int main()
@@ -506,6 +549,14 @@ int main()
 		else if (currentState == lose)
 		{
 			LoseGame(minesweeper, currentState);
+		}
+		else if (currentState == win)
+		{
+
+		}
+		else if (currentState == stopped)
+		{
+
 		}
 		ClearTerminal();
 	}
